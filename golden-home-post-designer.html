@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Golden Home — Post Designer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;900&family=Cormorant+Garamond:wght@500;600;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root{
+    --gold:#C9A961; --gold-soft:#E4CE9B; --brown:#2B1810; --cream:#F5EFE6;
+    --ink:#17110B; --panel:#1E1711; --panel-2:#241C14; --line:rgba(201,169,97,.22);
+    --txt:#EDE6D8; --muted:#9A8F7C;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:radial-gradient(1200px 800px at 80% -10%, #241a11 0%, var(--ink) 55%);
+    color:var(--txt); font-family:'Montserrat',sans-serif; min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{display:grid; grid-template-columns:400px 1fr; gap:0; min-height:100vh}
+  @media (max-width:920px){ .wrap{grid-template-columns:1fr} }
+
+  /* ---------- CONTROLS ---------- */
+  .controls{
+    background:linear-gradient(180deg,var(--panel),#1a140e);
+    border-inline-end:1px solid var(--line); padding:26px 24px 40px;
+    position:sticky; top:0; align-self:start; max-height:100vh; overflow-y:auto;
+  }
+  @media (max-width:920px){ .controls{position:static; max-height:none; border-inline-end:none; border-bottom:1px solid var(--line)} }
+  .brand{display:flex; align-items:baseline; gap:10px; margin-bottom:4px}
+  .brand h1{font-family:'Cormorant Garamond',serif; font-weight:700; font-size:26px; letter-spacing:.14em; color:var(--gold)}
+  .brand span{font-size:10px; letter-spacing:.32em; color:var(--muted); text-transform:uppercase}
+  .sub{font-size:11.5px; color:var(--muted); margin-bottom:22px; line-height:1.6}
+
+  .seg{display:flex; background:#140f0a; border:1px solid var(--line); border-radius:12px; padding:4px; margin-bottom:22px}
+  .seg button{flex:1; background:none; border:none; color:var(--muted); font-family:inherit; font-size:12.5px; font-weight:600; padding:10px; border-radius:8px; cursor:pointer; transition:.2s}
+  .seg button.on{background:linear-gradient(180deg,var(--gold),#b3924e); color:#1a1206; box-shadow:0 2px 10px rgba(201,169,97,.25)}
+
+  .field{margin-bottom:16px}
+  .field label{display:block; font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--gold); margin-bottom:7px; font-weight:600}
+  .field .hint{color:var(--muted); text-transform:none; letter-spacing:0; font-weight:400; font-size:10px}
+  input[type=text], textarea{
+    width:100%; background:#140f0a; border:1px solid var(--line); border-radius:9px;
+    color:var(--txt); font-family:'Cairo',sans-serif; font-size:14px; padding:10px 12px; transition:.15s;
+  }
+  textarea{resize:vertical; min-height:52px; line-height:1.5}
+  input:focus, textarea:focus{outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(201,169,97,.12)}
+  input::placeholder,textarea::placeholder{color:#6b6252}
+
+  .row{display:flex; gap:10px}
+  .row .field{flex:1}
+
+  .up{display:flex; gap:10px}
+  .up label.file{
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px;
+    background:#140f0a; border:1px dashed var(--line); border-radius:10px; padding:14px 8px; cursor:pointer;
+    text-align:center; transition:.15s; min-height:66px;
+  }
+  .up label.file:hover{border-color:var(--gold); background:#1a130c}
+  .up label.file .t{font-size:11px; font-weight:600; color:var(--txt)}
+  .up label.file .s{font-size:9.5px; color:var(--muted)}
+  .up label.file.has{border-style:solid; border-color:var(--gold)}
+  .up label.file .t.ok{color:var(--gold)}
+  input[type=file]{display:none}
+
+  .sliderrow{display:flex; align-items:center; gap:12px}
+  input[type=range]{flex:1; accent-color:var(--gold)}
+  .segsmall{display:flex; gap:6px}
+  .segsmall button{flex:1; background:#140f0a; border:1px solid var(--line); color:var(--muted); border-radius:8px; padding:8px 4px; font-size:11px; font-weight:600; cursor:pointer; font-family:inherit}
+  .segsmall button.on{border-color:var(--gold); color:var(--gold)}
+
+  .export{
+    width:100%; margin-top:24px; background:linear-gradient(180deg,var(--gold),#b3924e); color:#1a1206;
+    border:none; border-radius:11px; padding:15px; font-family:inherit; font-weight:700; font-size:13.5px;
+    letter-spacing:.05em; cursor:pointer; transition:.2s; box-shadow:0 6px 20px rgba(201,169,97,.22)
+  }
+  .export:hover{transform:translateY(-1px); box-shadow:0 10px 28px rgba(201,169,97,.32)}
+  .export:disabled{opacity:.5; cursor:not-allowed; transform:none}
+  .note{font-size:10.5px; color:var(--muted); margin-top:12px; line-height:1.6; text-align:center}
+
+  /* ---------- STAGE ---------- */
+  .stagewrap{display:flex; align-items:center; justify-content:center; padding:40px 24px; overflow:hidden}
+  .fit{transform-origin:top center}
+  .fit-h{display:flex; justify-content:center}
+
+  /* ---------- THE LOCKED AD ---------- */
+  .ad{position:relative; width:1080px; overflow:hidden; background:#0c0a07; color:#fff; font-family:'Cairo',sans-serif}
+  .ad[data-fmt="post"]{height:1350px}
+  .ad[data-fmt="story"]{height:1920px}
+  .ad .photo{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 50%}
+  .ad .noimg{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+    background:linear-gradient(160deg,#241a11,#0e0b07); color:#8a7d66; font-size:24px; letter-spacing:.04em; text-align:center}
+  .ad .noimg svg{width:70px;height:70px;opacity:.5}
+  .scrim-top{position:absolute; left:0; right:0; top:0}
+  .scrim-bot{position:absolute; left:0; right:0; bottom:0}
+
+  /* text safe-zone: content lives inside fixed padded columns */
+  .head{position:absolute; left:0; right:0; top:0; padding:78px 76px 0; text-align:right}
+  .kicker{font-weight:600; color:var(--gold); font-size:27px; letter-spacing:.02em; display:flex; align-items:center; justify-content:flex-end; gap:14px; margin-bottom:26px}
+  .kicker::after{content:""; width:46px; height:1px; background:var(--gold); opacity:.7}
+  .headline{font-weight:900; font-size:70px; line-height:1.14; letter-spacing:-.01em; text-shadow:none}
+  .headline .g{color:var(--gold)}
+  .subline{font-weight:500; font-size:31px; line-height:1.5; color:rgba(255,255,255,.92); margin-top:22px}
+  .tag{display:inline-block; margin-top:28px; border:1.5px solid rgba(201,169,97,.65); color:var(--gold); font-weight:700;
+    font-size:32px; padding:12px 34px; border-radius:44px;
+    background:rgba(201,169,97,.14); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.15), 0 4px 18px rgba(0,0,0,.25)}
+  .cta{margin-top:30px; color:var(--gold); font-weight:700; font-size:31px; display:flex; align-items:center; justify-content:flex-end; gap:14px}
+  .cta::before{content:"←"; font-size:26px}
+
+  /* footer */
+  .foot{position:absolute; left:0; right:0; bottom:0; padding:0 66px 60px; display:flex; align-items:flex-end; justify-content:space-between; direction:ltr}
+  .contact{display:flex; flex-direction:column; gap:8px}
+  .contact .ph{display:flex; align-items:center; gap:11px; font-family:'Montserrat',sans-serif; font-weight:500; font-size:30px; color:#fff}
+  .contact .ph svg{width:34px;height:34px; fill:var(--gold)}
+  .contact .handle{font-family:'Montserrat',sans-serif; font-weight:400; font-size:25px; color:rgba(255,255,255,.82); padding-inline-start:45px}
+  .logoslot{display:flex; align-items:flex-end}
+  .logoslot img{height:96px; width:auto; object-fit:contain; display:block}
+  .wordmark{text-align:right}
+  .wordmark .wm{font-family:'Cormorant Garamond',serif; font-weight:700; font-size:44px; letter-spacing:.12em; color:var(--gold); line-height:1}
+  .wordmark .ws{font-family:'Montserrat',sans-serif; font-weight:500; font-size:16px; letter-spacing:.42em; color:var(--gold); text-transform:uppercase; margin-top:6px}
+
+  /* STORY overrides */
+  .ad[data-fmt="story"] .topbar{position:absolute; top:70px; left:50%; transform:translateX(-50%);
+    background:rgba(18,13,8,.55); border:1px solid rgba(201,169,97,.4); border-radius:20px;
+    padding:22px 40px; display:flex; align-items:center; justify-content:center; min-width:360px}
+  .ad[data-fmt="story"] .topbar img{height:74px; width:auto; object-fit:contain}
+  .ad[data-fmt="story"] .topbar .wordmark{text-align:center}
+  .ad[data-fmt="story"] .head{top:auto; bottom:360px; padding:0 84px; text-align:center}
+  .ad[data-fmt="story"] .kicker{justify-content:center; font-size:29px}
+  .ad[data-fmt="story"] .kicker::before{content:""; width:46px; height:1px; background:var(--gold); opacity:.7}
+  .ad[data-fmt="story"] .headline{font-size:80px}
+  .ad[data-fmt="story"] .subline{font-size:33px}
+  .ad[data-fmt="story"] .cta{justify-content:center; margin-top:40px}
+  .ad[data-fmt="story"] .cta{display:inline-flex; background:linear-gradient(180deg,var(--gold),#b3924e); color:#1a1206;
+    padding:20px 54px; border-radius:50px; font-size:32px; box-shadow:0 8px 24px rgba(0,0,0,.3)}
+  .ad[data-fmt="story"] .cta::before{content:""}
+  .ad[data-fmt="story"] .ctawrap{text-align:center; position:absolute; left:0; right:0; bottom:230px}
+  .ad[data-fmt="story"] .foot{padding:0 66px 90px}
+  .ad[data-fmt="story"] .tag{display:none}
+
+  .ad[data-fmt="post"] .topbar{display:none}
+  .ad[data-fmt="post"] .ctawrap{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ================= CONTROLS ================= -->
+  <aside class="controls">
+    <div class="brand"><h1>GOLDEN HOME</h1></div>
+    <div class="sub">قالب مقفول على الهوية. الصورة الحقيقية بتتحط، والتكست في مكانه الثابت — نفس التصميم بالمليمتر كل مرة، جاهز Upload.</div>
+
+    <div class="seg" id="fmt">
+      <button data-f="post" class="on">Post · 3:4</button>
+      <button data-f="story">Story · 9:16</button>
+    </div>
+
+    <div class="up" style="margin-bottom:16px">
+      <label class="file" id="photoLbl">
+        <span class="t">صورة الوحدة</span>
+        <span class="s">اضغط للرفع (بعد التحسين بالـ AI)</span>
+        <input type="file" id="photo" accept="image/*">
+      </label>
+      <label class="file" id="logoLbl">
+        <span class="t">اللوجو</span>
+        <span class="s">اختياري · PNG شفاف</span>
+        <input type="file" id="logo" accept="image/*">
+      </label>
+    </div>
+
+    <div class="field">
+      <label>الكيكر <span class="hint">— المشروع / المنطقة</span></label>
+      <input type="text" id="kicker" value="مارينا 5 | الساحل الشمالي">
+    </div>
+    <div class="field">
+      <label>الهيدلاين <span class="hint">— حُط *نجمة* حوالين الكلمة اللي تبقى دهبي</span></label>
+      <textarea id="headline">صيفك... بحمام سباحة *خاص*</textarea>
+    </div>
+    <div class="field">
+      <label>السَب-لاين <span class="hint">— المميزات، افصل بـ ·</span></label>
+      <textarea id="subline">3 غرف ماستر · 4 حمامات · جاكوزي · فرش جديد بالكامل</textarea>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>التاج <span class="hint">(Post)</span></label>
+        <input type="text" id="tag" value="أول مرة يتأجر">
+      </div>
+      <div class="field">
+        <label>الـ CTA</label>
+        <input type="text" id="cta" value="احجز إجازتك">
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>واتساب</label>
+        <input type="text" id="phone" value="+20 114 4111636">
+      </div>
+      <div class="field">
+        <label>الهاندل</label>
+        <input type="text" id="handle" value="@goldenhome.egy">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>قوة التعتيم <span class="hint">— حسب إضاءة الصورة</span></label>
+      <div class="segsmall" id="scrim">
+        <button data-s="light">فاتحة</button>
+        <button data-s="medium" class="on">متوسطة</button>
+        <button data-s="strong">قوية</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>إطار الصورة <span class="hint">— حرّك عشان تظبط الكادر</span></label>
+      <div class="sliderrow"><input type="range" id="posY" min="0" max="100" value="50"></div>
+    </div>
+
+    <button class="export" id="exportBtn" disabled>⬇  تنزيل PNG جاهز</button>
+    <div class="note" id="dlNote">ارفع الصورة الأول عشان يشتغل التنزيل. المقاس الحقيقي: Post 1080×1350 · Story 1080×1920 (×2 للوضوح).</div>
+
+    <div id="fallbackWrap" style="display:none; margin-top:18px; border-top:1px solid var(--line); padding-top:16px">
+      <div style="font-size:11px; color:var(--gold); font-weight:700; margin-bottom:8px; letter-spacing:.04em">لو التنزيل التلقائي ما اشتغلش:</div>
+      <div style="font-size:11px; color:var(--muted); margin-bottom:10px; line-height:1.7">دوس بالزرار اليمين على الصورة تحت واختار "حفظ الصورة باسم" — ده بيشتغل دايمًا مهما كانت إعدادات المتصفح.</div>
+      <img id="fallbackImg" style="width:100%; border-radius:8px; border:1px solid var(--line); display:block">
+    </div>
+  </aside>
+
+  <!-- ================= STAGE ================= -->
+  <main class="stagewrap">
+    <div class="fit-h">
+      <div class="fit" id="fit">
+        <div class="ad" id="ad" data-fmt="post">
+          <img class="photo" id="adPhoto" alt="" style="display:none">
+          <div class="noimg" id="noimg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>
+            صورة الوحدة تظهر هنا
+          </div>
+          <div class="scrim-top" id="scrimTop"></div>
+          <div class="scrim-bot" id="scrimBot"></div>
+
+          <!-- story top bar -->
+          <div class="topbar" id="topbar"></div>
+
+          <!-- headline block -->
+          <div class="head" id="headBlock">
+            <div class="kicker" id="adKicker"></div>
+            <div class="headline" id="adHeadline"></div>
+            <div class="subline" id="adSubline"></div>
+            <span class="tag" id="adTag"></span>
+            <div class="cta" id="adCtaPost"></div>
+          </div>
+
+          <!-- story floating cta -->
+          <div class="ctawrap" id="ctaWrap"><span class="cta" id="adCtaStory"></span></div>
+
+          <!-- footer -->
+          <div class="foot" id="foot">
+            <div class="contact">
+              <div class="ph" id="adPhone">
+                <svg viewBox="0 0 24 24"><path d="M17.5 14.4c-1 0-2-.2-3-.5a1 1 0 0 0-1 .2l-1.3 1.3a13 13 0 0 1-5.3-5.3l1.3-1.3a1 1 0 0 0 .2-1c-.3-1-.5-2-.5-3a1 1 0 0 0-1-1H4.2a1 1 0 0 0-1 1A14.3 14.3 0 0 0 17.5 20.8a1 1 0 0 0 1-1v-2.4a1 1 0 0 0-1-1z"/></svg>
+                <span id="adPhoneTxt"></span>
+              </div>
+              <div class="handle" id="adHandle"></div>
+            </div>
+            <div class="logoslot" id="logoSlot"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const ad = $('ad');
+  let fmt = 'post';
+  let scrim = 'medium';
+  let photoData = null, logoData = null;
+
+  const scrimAlpha = { light:0.62, medium:0.82, strong:0.95 };
+
+  function wordmarkHTML(){
+    return '<div class="wordmark"><div class="wm">GOLDEN HOME</div><div class="ws">For Real Estate</div></div>';
+  }
+
+  function applyScrim(){
+    const a = scrimAlpha[scrim];
+    const top = fmt==='post' ? 0.60 : 0.30;
+    const botStop = fmt==='post' ? 0.74 : 0.72;
+    const topH = fmt==='post' ? '62%' : '46%';
+    const botH = fmt==='post' ? '34%' : '46%';
+    $('scrimTop').style.height = topH;
+    $('scrimTop').style.background = `linear-gradient(180deg, rgba(15,10,6,${a}) 0%, rgba(15,10,6,${a*0.6}) ${(top*70)|0}%, rgba(15,10,6,0) 100%)`;
+    $('scrimBot').style.height = botH;
+    $('scrimBot').style.background = `linear-gradient(0deg, rgba(15,10,6,${Math.min(a+0.04,0.99)}) 0%, rgba(15,10,6,${a*0.5}) ${((1-botStop)*100)|0}%, rgba(15,10,6,0) 100%)`;
+  }
+
+  function parseGold(s){
+    const esc = s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return esc.replace(/\*(.+?)\*/g, '<span class="g">$1</span>');
+  }
+
+  function render(){
+    ad.setAttribute('data-fmt', fmt);
+    // photo
+    if(photoData){ $('adPhoto').src = photoData; $('adPhoto').style.display='block'; $('noimg').style.display='none'; }
+    else { $('adPhoto').style.display='none'; $('noimg').style.display='flex'; }
+    $('adPhoto').style.objectPosition = 'center ' + $('posY').value + '%';
+
+    // text
+    $('adKicker').textContent = $('kicker').value;
+    $('adHeadline').innerHTML = parseGold($('headline').value).replace(/\n/g,'<br>');
+    $('adSubline').textContent = $('subline').value;
+    const tagV = $('tag').value.trim();
+    $('adTag').textContent = tagV; $('adTag').style.display = tagV ? 'inline-block':'none';
+
+    const ctaV = $('cta').value.trim();
+    $('adCtaPost').textContent = ctaV; $('adCtaPost').style.display = ctaV ? 'flex':'none';
+    $('adCtaStory').textContent = ctaV;
+    $('ctaWrap').style.display = (fmt==='story' && ctaV) ? 'block':'none';
+
+    $('adPhoneTxt').textContent = $('phone').value;
+    $('adHandle').textContent = $('handle').value;
+
+    // logo (footer for post, topbar for story)
+    const logoImg = logoData ? `<img src="${logoData}" alt="Golden Home">` : wordmarkHTML();
+    if(fmt==='story'){
+      $('topbar').innerHTML = logoImg;
+      $('logoSlot').innerHTML = '';
+      $('logoSlot').style.display='none';
+    } else {
+      $('topbar').innerHTML = '';
+      $('logoSlot').style.display='flex';
+      $('logoSlot').innerHTML = logoImg;
+    }
+    applyScrim();
+  }
+
+  function fitStage(){
+    const wrap = document.querySelector('.stagewrap');
+    const avail = wrap.clientWidth - 48;
+    const maxH = window.innerHeight - 80;
+    const w = 1080, h = fmt==='post'?1350:1920;
+    let scale = Math.min(avail/w, maxH/h, 1);
+    scale = Math.max(scale, 0.12);
+    $('fit').style.transform = `scale(${scale})`;
+    document.querySelector('.fit-h').style.height = (h*scale)+'px';
+    document.querySelector('.fit-h').style.width = (w*scale)+'px';
+  }
+
+  // ---- events ----
+  $('fmt').addEventListener('click', e=>{
+    const b = e.target.closest('button'); if(!b) return;
+    [...$('fmt').children].forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); fmt = b.dataset.f; render(); fitStage();
+  });
+  $('scrim').addEventListener('click', e=>{
+    const b = e.target.closest('button'); if(!b) return;
+    [...$('scrim').children].forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); scrim = b.dataset.s; applyScrim();
+  });
+  ['kicker','headline','subline','tag','cta','phone','handle'].forEach(id=>{
+    $(id).addEventListener('input', render);
+  });
+  $('posY').addEventListener('input', ()=>{ $('adPhoto').style.objectPosition='center '+$('posY').value+'%'; });
+
+  function readFile(input, cb){
+    const f = input.files[0]; if(!f) return;
+    const r = new FileReader();
+    r.onload = e => cb(e.target.result);
+    r.readAsDataURL(f);
+  }
+  $('photo').addEventListener('change', function(){
+    readFile(this, d=>{ photoData=d; $('photoLbl').classList.add('has'); $('photoLbl').querySelector('.t').classList.add('ok'); $('photoLbl').querySelector('.t').textContent='✓ الصورة اترفعت'; $('exportBtn').disabled=false; render(); });
+  });
+  $('logo').addEventListener('change', function(){
+    readFile(this, d=>{ logoData=d; $('logoLbl').classList.add('has'); $('logoLbl').querySelector('.t').classList.add('ok'); $('logoLbl').querySelector('.t').textContent='✓ اللوجو اترفع'; render(); });
+  });
+
+  // ---- export ----
+  $('exportBtn').addEventListener('click', async function(){
+    if(!photoData) return;
+    const btn = this; const old = btn.textContent;
+    btn.disabled=true; btn.textContent='… بيجهّز';
+    await document.fonts.ready;
+    const prevT = $('fit').style.transform;
+    $('fit').style.transform = 'scale(1)';
+    try{
+      const canvas = await html2canvas(ad, {scale:2, useCORS:true, backgroundColor:'#0c0a07', logging:false, width:1080, height:(fmt==='post'?1350:1920)});
+      const dataUrl = canvas.toDataURL('image/png');
+      const filename = `golden-home-${fmt}-${Date.now()}.png`;
+
+      // Always show the manual-save fallback — works even inside a restricted preview.
+      $('fallbackImg').src = dataUrl;
+      $('fallbackWrap').style.display = 'block';
+      $('dlNote').textContent = 'الصورة اتعملت. لو التنزيل التلقائي مانزلش، استخدم "حفظ باسم" تحت.';
+
+      // Attempt automatic download too (works when opened in a normal browser tab).
+      const a = document.createElement('a');
+      a.download = filename;
+      a.href = dataUrl;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }catch(err){
+      $('dlNote').textContent = 'حصل خطأ في التوليد — جرّب تفتح الملف في تاب متصفح كامل (مش المعاينة).';
+      console.error(err);
+    }
+    $('fit').style.transform = prevT;
+    btn.disabled=false; btn.textContent=old;
+  });
+
+  window.addEventListener('resize', fitStage);
+  document.fonts.ready.then(render).then(fitStage);
+  render(); fitStage();
+})();
+</script>
+</body>
+</html>
