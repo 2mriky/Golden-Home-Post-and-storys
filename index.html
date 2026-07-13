@@ -536,17 +536,29 @@
       + '<style>'+baseCss+'</style>'
       + xml
       + '</div></foreignObject></svg>';
-    const blob = new Blob([svgStr], {type:'image/svg+xml;charset=utf-8'});
-    const url = URL.createObjectURL(blob);
+
+    // data: URI instead of blob: — blob: URLs get blocked by the CSP inside
+    // some restricted preview frames, data: URIs are permitted far more widely.
+    let svgDataUri;
+    try{
+      const b64 = btoa(unescape(encodeURIComponent(svgStr)));
+      svgDataUri = 'data:image/svg+xml;charset=utf-8;base64,' + b64;
+    }catch(e){
+      svgDataUri = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
+    }
+
     const img = new Image();
-    await new Promise((resolve,reject)=>{ img.onload=resolve; img.onerror=reject; img.src=url; });
+    await new Promise((resolve,reject)=>{
+      img.onload = resolve;
+      img.onerror = () => reject(new Error('SVG image failed to load/render'));
+      img.src = svgDataUri;
+    });
     const canvas = document.createElement('canvas');
     canvas.width = w*scale; canvas.height = h*scale;
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = '#0c0a07'; ctx.fillRect(0,0,canvas.width,canvas.height);
     ctx.scale(scale,scale);
     ctx.drawImage(img,0,0,w,h);
-    URL.revokeObjectURL(url);
     return canvas.toDataURL('image/png');
   }
 
@@ -567,7 +579,7 @@
       a.download = filename; a.href = dataUrl;
       document.body.appendChild(a); a.click(); a.remove();
     }catch(err){
-      $('dlNote').textContent = 'حصل خطأ في التوليد — جرّب تفتح الملف في تاب متصفح كامل (مش المعاينة).';
+      $('dlNote').textContent = 'الشكل اللي شايفه على الشاشة صحيح 100% — بس التصدير فشل هنا (' + (err && err.message ? err.message : 'خطأ غير معروف') + '). افتح الملف في تاب متصفح كامل وجرّب تاني.';
       console.error(err);
     }
     btn.disabled=false; btn.textContent=old;
