@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;900&family=Cormorant+Garamond:wght@500;600;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/heic2any/dist/heic2any.min.js" crossorigin="anonymous"></script>
 <style id="mainStyle">
   :root{
     --gold:#C9A961; --gold-soft:#E4CE9B; --brown:#2B1810; --cream:#F5EFE6;
@@ -94,6 +95,7 @@
   .tpl{position:absolute; inset:0; display:none}
   .ad[data-tpl="cinematic"] .tpl-cinematic{display:block}
   .ad[data-tpl="framed"] .tpl-framed{display:block}
+  .ad[data-tpl="minimal"] .tpl-minimal{display:block}
 
   .noimg{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
     background:linear-gradient(160deg,#241a11,#0e0b07); color:#8a7d66; font-size:22px; letter-spacing:.04em; text-align:center; z-index:1}
@@ -177,6 +179,33 @@
   .fr-contact{display:flex; align-items:center; gap:10px; font-family:'Montserrat',sans-serif; font-weight:500; font-size:21px; color:var(--brown)}
   .fr-contact svg{width:23px;height:23px; fill:var(--gold)}
   .fr-handle{font-family:'Montserrat',sans-serif; font-weight:400; font-size:18px; color:rgba(43,24,16,.62)}
+
+  /* ================= TEMPLATE C — MINIMAL BAR (gallery-quiet) ================= */
+  .tpl-minimal .js-photo{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 50%}
+  .ms-topbar{position:absolute; top:0; left:0; right:0; padding:46px 0 26px; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(180deg, rgba(12,10,7,.5) 0%, rgba(12,10,7,0) 100%)}
+  .ms-topbar img{height:60px; width:auto; object-fit:contain}
+  .ms-topbar .wordmark{text-align:center}
+  .ms-topbar .wordmark .wm{font-size:32px}
+
+  .ms-band{position:absolute; left:0; right:0; bottom:0; background:var(--brown); padding:46px 70px 40px; text-align:right}
+  .ms-kicker{font-weight:600; color:var(--gold); font-size:22px; display:flex; align-items:center; justify-content:flex-end; gap:12px; margin-bottom:16px}
+  .ms-kicker::after{content:""; width:38px; height:1px; background:var(--gold)}
+  .ms-headline{font-weight:900; font-size:52px; line-height:1.2; color:#fff}
+  .ms-subline{font-weight:500; font-size:23px; line-height:1.6; color:rgba(255,255,255,.82); margin-top:14px}
+  .ms-row{display:flex; align-items:center; justify-content:flex-end; gap:16px; margin-top:22px; flex-wrap:wrap}
+  .ms-tag{border:1.5px solid rgba(201,169,97,.6); color:var(--gold); font-weight:600; font-size:18px; padding:8px 22px; border-radius:34px; background:rgba(30,20,10,.4)}
+  .ms-cta{color:var(--gold); font-weight:700; font-size:24px; display:flex; align-items:center; gap:10px}
+  .ms-cta::before{content:"←"}
+  .ms-hr{height:1px; background:rgba(201,169,97,.25); margin:24px 0 16px}
+  .ms-foot{display:flex; align-items:center; justify-content:space-between; direction:ltr}
+  .ms-contact{display:flex; align-items:center; gap:10px; font-family:'Montserrat',sans-serif; font-weight:500; font-size:21px; color:#fff}
+  .ms-contact svg{width:23px;height:23px; fill:var(--gold)}
+  .ms-handle{font-family:'Montserrat',sans-serif; font-weight:400; font-size:18px; color:rgba(255,255,255,.6)}
+
+  .ad[data-fmt="story"] .ms-band{padding:56px 78px 50px}
+  .ad[data-fmt="story"] .ms-headline{font-size:60px}
+  .ad[data-fmt="story"] .ms-subline{font-size:26px}
 </style>
 </head>
 <body>
@@ -191,6 +220,7 @@
     <div class="seg" id="tplSel">
       <button data-t="cinematic" class="on">سينمائي</button>
       <button data-t="framed">إطار أبيض</button>
+      <button data-t="minimal">مينيمال</button>
     </div>
 
     <div class="groupLabel">الفورمات</div>
@@ -202,13 +232,13 @@
     <div class="up" style="margin-bottom:16px">
       <label class="file" id="photoLbl">
         <span class="t">صورة الوحدة</span>
-        <span class="s">اضغط للرفع (بعد التحسين بالـ AI)</span>
-        <input type="file" id="photo" accept="image/*">
+        <span class="s">اضغط للرفع · أي صيغة (JPG, PNG, HEIC..)</span>
+        <input type="file" id="photo" accept="image/*,.heic,.heif">
       </label>
       <label class="file" id="logoLbl">
         <span class="t">اللوجو</span>
-        <span class="s">اختياري · PNG شفاف</span>
-        <input type="file" id="logo" accept="image/*">
+        <span class="s">اختياري · أي صيغة صورة</span>
+        <input type="file" id="logo" accept="image/*,.heic,.heif">
       </label>
     </div>
 
@@ -344,6 +374,33 @@
             </div>
           </div>
 
+          <!-- ============ TEMPLATE C — MINIMAL BAR (gallery-quiet) ============ -->
+          <div class="tpl tpl-minimal">
+            <img class="js-photo" alt="" style="display:none">
+            <div class="noimg js-noimg">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>
+              صورة الوحدة تظهر هنا
+            </div>
+            <div class="ms-topbar js-logoMinimal"></div>
+            <div class="ms-band">
+              <div class="ms-kicker js-kicker"></div>
+              <div class="ms-headline js-headline"></div>
+              <div class="ms-subline js-subline"></div>
+              <div class="ms-row">
+                <span class="ms-tag js-tag"></span>
+                <span class="ms-cta js-cta" data-role="minimal"></span>
+              </div>
+              <div class="ms-hr"></div>
+              <div class="ms-foot">
+                <div class="ms-contact">
+                  <svg viewBox="0 0 24 24"><path d="M17.5 14.4c-1 0-2-.2-3-.5a1 1 0 0 0-1 .2l-1.3 1.3a13 13 0 0 1-5.3-5.3l1.3-1.3a1 1 0 0 0 .2-1c-.3-1-.5-2-.5-3a1 1 0 0 0-1-1H4.2a1 1 0 0 0-1 1A14.3 14.3 0 0 0 17.5 20.8a1 1 0 0 0 1-1v-2.4a1 1 0 0 0-1-1z"/></svg>
+                  <span class="js-phone"></span>
+                </div>
+                <div class="ms-handle js-handle"></div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -422,6 +479,7 @@
       if(role==='post'){ el.style.display = (fmt==='post' && ctaV) ? 'flex' : 'none'; }
       else if(role==='story'){ el.style.display = ctaV ? 'inline-flex' : 'none'; }
       else if(role==='framed'){ el.style.display = ctaV ? 'inline-block' : 'none'; }
+      else if(role==='minimal'){ el.style.display = ctaV ? 'flex' : 'none'; }
     });
     document.querySelectorAll('.js-ctawrap').forEach(el=>{
       el.style.display = (fmt==='story' && ctaV) ? 'block' : 'none';
@@ -437,6 +495,7 @@
       document.querySelectorAll('.js-logoSlot').forEach(el=>{ el.style.display='flex'; el.innerHTML = logoImg; });
     }
     document.querySelectorAll('.js-logoFramed').forEach(el=>{ el.innerHTML = logoImg; });
+    document.querySelectorAll('.js-logoMinimal').forEach(el=>{ el.innerHTML = logoImg; });
 
     applyScrim();
   }
@@ -476,17 +535,58 @@
   });
   $('posY').addEventListener('input', render);
 
-  function readFile(input, cb){
-    const f = input.files[0]; if(!f) return;
-    const r = new FileReader();
-    r.onload = e => cb(e.target.result);
-    r.readAsDataURL(f);
+  async function fileToDataUrl(file){
+    const isHeic = /\.(heic|heif)$/i.test(file.name) || /heic|heif/i.test(file.type||'');
+    if(isHeic){
+      if(typeof heic2any !== 'function'){
+        throw new Error('محوّل HEIC لسه بيتحمّل، استنى ثانية وجرّب تاني');
+      }
+      let out = await heic2any({ blob:file, toType:'image/jpeg', quality:0.92 });
+      if(Array.isArray(out)) out = out[0];
+      file = out;
+    }
+    return await new Promise((resolve,reject)=>{
+      const r = new FileReader();
+      r.onload = e => resolve(e.target.result);
+      r.onerror = () => reject(new Error('تعذّرت قراءة الملف'));
+      r.readAsDataURL(file);
+    });
   }
-  $('photo').addEventListener('change', function(){
-    readFile(this, d=>{ photoData=d; $('photoLbl').classList.add('has'); $('photoLbl').querySelector('.t').classList.add('ok'); $('photoLbl').querySelector('.t').textContent='✓ الصورة اترفعت'; $('exportBtn').disabled=false; render(); });
+
+  $('photo').addEventListener('change', async function(){
+    const f = this.files[0]; if(!f) return;
+    const label = $('photoLbl').querySelector('.t');
+    const prevTxt = label.textContent;
+    label.textContent = '… بيتحوّل';
+    try{
+      photoData = await fileToDataUrl(f);
+      $('photoLbl').classList.add('has');
+      label.classList.add('ok');
+      label.textContent = '✓ الصورة اترفعت';
+      $('exportBtn').disabled = false;
+      render();
+    }catch(err){
+      label.textContent = prevTxt;
+      alert('حصل خطأ في رفع الصورة: ' + err.message);
+      console.error(err);
+    }
   });
-  $('logo').addEventListener('change', function(){
-    readFile(this, d=>{ logoData=d; $('logoLbl').classList.add('has'); $('logoLbl').querySelector('.t').classList.add('ok'); $('logoLbl').querySelector('.t').textContent='✓ اللوجو اترفع'; render(); });
+  $('logo').addEventListener('change', async function(){
+    const f = this.files[0]; if(!f) return;
+    const label = $('logoLbl').querySelector('.t');
+    const prevTxt = label.textContent;
+    label.textContent = '… بيتحوّل';
+    try{
+      logoData = await fileToDataUrl(f);
+      $('logoLbl').classList.add('has');
+      label.classList.add('ok');
+      label.textContent = '✓ اللوجو اترفع';
+      render();
+    }catch(err){
+      label.textContent = prevTxt;
+      alert('حصل خطأ في رفع اللوجو: ' + err.message);
+      console.error(err);
+    }
   });
 
   // ---- HIGH-QUALITY EXPORT (fixes Arabic shaping) ----
@@ -521,12 +621,68 @@
   }
   loadFontCss(); // pre-warm in the background
 
+  function loadImage(src){
+    return new Promise((resolve,reject)=>{
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error('فشل تحميل الصورة'));
+      img.src = src;
+    });
+  }
+
+  // Replicates CSS object-fit:cover + object-position:center Y% using plain
+  // canvas drawImage — 100% reliable, no foreignObject involved for the photo.
+  function drawCover(ctx, img, dx, dy, dw, dh, posYPercent){
+    const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
+    const targetRatio = dw/dh, srcRatio = iw/ih;
+    let sx, sy, sw, sh;
+    if(srcRatio > targetRatio){
+      sh = ih; sw = ih*targetRatio; sy = 0; sx = (iw-sw)*0.5;
+    } else {
+      sw = iw; sh = iw/targetRatio; sx = 0; sy = (ih-sh)*(posYPercent/100);
+    }
+    ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+  }
+
+  // Exact pixel rect the photo occupies for each template/format combo —
+  // mirrors the CSS layout (full-bleed for cinematic/minimal, top portion
+  // inside the mat border for framed).
+  function getPhotoRect(curTpl, curFmt, w, h){
+    if(curTpl === 'framed'){
+      const pad = 20;
+      const innerW = w - pad*2, innerH = h - pad*2;
+      const basis = (curFmt === 'story') ? 0.58 : 0.62;
+      return { x: pad, y: pad, w: innerW, h: innerH*basis };
+    }
+    return { x:0, y:0, w:w, h:h };
+  }
+
   async function exportPNG(){
     const w = 1080, h = (fmt==='post') ? 1350 : 1920;
     const scale = 2; // retina — crisp on any feed/story
+
+    const canvas = document.createElement('canvas');
+    canvas.width = w*scale; canvas.height = h*scale;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(scale, scale);
+    ctx.fillStyle = '#0c0a07';
+    ctx.fillRect(0,0,w,h);
+
+    // 1) Draw the real unit photo straight onto the canvas — no foreignObject,
+    //    so this can never render as a black gap.
+    const photoImg = await loadImage(photoData);
+    const rect = getPhotoRect(tpl, fmt, w, h);
+    drawCover(ctx, photoImg, rect.x, rect.y, rect.w, rect.h, Number($('posY').value));
+
+    // 2) Rasterize ONLY the text/branding overlay via foreignObject (this is
+    //    what needs the browser's real Arabic text shaping). The photo <img>
+    //    inside the clone is hidden and the opaque root backgrounds are forced
+    //    transparent so the photo drawn in step 1 shows through correctly.
     const fontCss = await loadFontCss();
     const baseCss = $('mainStyle').innerHTML;
     const clone = ad.cloneNode(true);
+    clone.querySelectorAll('.js-photo').forEach(el=>{ el.removeAttribute('src'); el.style.display='none'; });
+    const overrideCss = '.ad{background:transparent !important} .fr-inner{background:transparent !important}';
     const xml = new XMLSerializer().serializeToString(clone);
     const svgStr =
       '<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'">'
@@ -534,11 +690,10 @@
       + '<div xmlns="http://www.w3.org/1999/xhtml" style="width:'+w+'px;height:'+h+'px;">'
       + '<style>'+fontCss+'</style>'
       + '<style>'+baseCss+'</style>'
+      + '<style>'+overrideCss+'</style>'
       + xml
       + '</div></foreignObject></svg>';
 
-    // data: URI instead of blob: — blob: URLs get blocked by the CSP inside
-    // some restricted preview frames, data: URIs are permitted far more widely.
     let svgDataUri;
     try{
       const b64 = btoa(unescape(encodeURIComponent(svgStr)));
@@ -546,19 +701,9 @@
     }catch(e){
       svgDataUri = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
     }
+    const overlayImg = await loadImage(svgDataUri);
+    ctx.drawImage(overlayImg, 0, 0, w, h);
 
-    const img = new Image();
-    await new Promise((resolve,reject)=>{
-      img.onload = resolve;
-      img.onerror = () => reject(new Error('SVG image failed to load/render'));
-      img.src = svgDataUri;
-    });
-    const canvas = document.createElement('canvas');
-    canvas.width = w*scale; canvas.height = h*scale;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#0c0a07'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.scale(scale,scale);
-    ctx.drawImage(img,0,0,w,h);
     return canvas.toDataURL('image/png');
   }
 
